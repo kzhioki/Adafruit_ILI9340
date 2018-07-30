@@ -21,6 +21,10 @@
   #include <pgmspace.h>
 #endif
 
+#if defined(ARDUINO_ARCH_SPRESENSE)
+#define digitalPinToBitMask(pin) pin
+#endif
+
 #include <limits.h>
 #include "pins_arduino.h"
 #include "wiring_private.h"
@@ -36,7 +40,7 @@
   #define SET_BIT(port, bitMask) *(port) |= (bitMask)
   #define CLEAR_BIT(port, bitMask) *(port) &= ~(bitMask)
 #endif
-#if (defined(__arm__) && defined(CORE_TEENSY)) || defined(ESP8266)
+#if (defined(__arm__) && defined(CORE_TEENSY)) || defined(ESP8266) || defined(ARDUINO_ARCH_SPRESENSE)
   #define USE_SPI_LIBRARY
   #define SET_BIT(port, bitMask) digitalWrite(*(port), HIGH);
   #define CLEAR_BIT(port, bitMask) digitalWrite(*(port), LOW);
@@ -171,7 +175,7 @@ void Adafruit_ILI9340::begin(void) {
   csport    = digitalPinToPort(_cs);
   dcport    = digitalPinToPort(_dc);
 #endif
-#if (defined(__arm__) && defined(CORE_TEENSY)) || defined(ESP8266)
+#if (defined(__arm__) && defined(CORE_TEENSY)) || defined(ESP8266) || defined(ARDUINO_ARCH_SPRESENSE)
   mosiport = &_mosi;
   clkport = &_sclk;
   rsport = &_rst;
@@ -183,7 +187,7 @@ void Adafruit_ILI9340::begin(void) {
 
   if(hwSPI) { // Using hardware SPI
     SPI.begin();
-#if defined(__AVR__) || defined(ESP8266)
+#if defined(__AVR__) || defined(ESP8266) || defined(ARDUINO_ARCH_SPRESENSE)
     SPI.setClockDivider(SPI_CLOCK_DIV2); // 8 MHz (full! speed!)
 #endif
 #if defined(__SAM3X8E__)

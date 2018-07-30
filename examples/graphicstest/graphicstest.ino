@@ -28,7 +28,11 @@
 #define _sclk 13
 #define _miso 12
 #define _mosi 11
+#if defined(ARDUINO_ARCH_SPRESENSE)
+#define _cs 7
+#else
 #define _cs 10
+#endif
 #define _dc 9
 #define _rst 8
 
@@ -38,7 +42,7 @@
 Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _rst);
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   while (!Serial);
   
   Serial.println("Adafruit 2.2\" SPI TFT Test!"); 

@@ -17,7 +17,11 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include "Adafruit_ILI9340.h" // Hardware-specific library
 #include <SPI.h>
+#if defined(ARDUINO_ARCH_SPRESENSE)
+#include <SDHCI.h>
+#else
 #include <SD.h>
+#endif
 
 #if defined(__SAM3X8E__)
     #undef __FlashStringHelper::F(string_literal)
@@ -30,26 +34,36 @@
 // Duemilanove, etc., pin 11 = MOSI, pin 12 = MISO, pin 13 = SCK.
 #define TFT_RST 8
 #define TFT_DC 9
+#if defined(ARDUINO_ARCH_SPRESENSE)
+#define TFT_CS 7
+#else
 #define TFT_CS 10
+#endif
 #define SD_CS 4
+
+SDClass SD;
 
 Adafruit_ILI9340 tft = Adafruit_ILI9340(TFT_CS, TFT_DC, TFT_RST);
 
 void setup(void) {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
+#if !defined(ARDUINO_ARCH_SPRESENSE)
   pinMode(SD_CS, OUTPUT);
   digitalWrite(SD_CS, HIGH);
+#endif
   
   tft.begin();
   tft.fillScreen(ILI9340_BLUE);
   
 
   Serial.print("Initializing SD card...");
+#if !defined(ARDUINO_ARCH_SPRESENSE)
   if (!SD.begin(SD_CS)) {
     Serial.println("failed!");
     return;
   }
+#endif
   Serial.println("OK!");
 
 
@@ -82,8 +96,12 @@ void bmpDraw(char *filename, uint16_t x, uint16_t y) {
   boolean  flip    = true;        // BMP is stored bottom-to-top
   int      w, h, row, col;
   uint8_t  r, g, b;
+#if defined(ARDUINO_ARCH_SPRESENSE)
+  uint32_t pos = 0;
+  uint64_t startTime = millis();
+#else
   uint32_t pos = 0, startTime = millis();
-
+#endif
   if((x >= tft.width()) || (y >= tft.height())) return;
 
   Serial.println();
